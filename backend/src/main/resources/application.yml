@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: kairos-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/kairos}
+    username: ${SPRING_DATASOURCE_USERNAME:kairos}
+    password: ${SPRING_DATASOURCE_PASSWORD:kairos}
+    hikari:
+      maximum-pool-size: 20
+      pool-name: kairos-pool
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc.time_zone: UTC
+        format_sql: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
+      repositories:
+        enabled: false   # we only use StringRedisTemplate
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8080}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+  tracing:
+    enabled: true
+    sampling:
+      probability: 1.0   # local dev. lower this in prod
+  observations:
+    annotations:
+      enabled: true
+  otlp:
+    tracing:
+      endpoint: ${OTEL_EXPORTER_OTLP_TRACES_ENDPOINT:http://localhost:4318/v1/traces}
+
+kairos:
+  cors:
+    allowed-origins: ${KAIROS_ALLOWED_ORIGINS:http://localhost:3000}
+  ratelimit:
+    requests-per-minute: ${KAIROS_RATELIMIT:300}
+  demo:
+    # seeded by V2 migration. stand-in for Clerk JWT
+    workspace-id: 11111111-1111-1111-1111-111111111111
